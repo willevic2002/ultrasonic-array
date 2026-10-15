@@ -7,12 +7,23 @@ Licens: CERN-OHL-P-2.0 (se [LICENSE](LICENSE)).
 | Fil | Plats |
 |---|---|
 | `mic_array.kicad_pcb` | `kicad/` |
-| `make_kicad_pcb.py`, `gen_layout.py`, `place_mics.py` | `scripts/` |
+| `place_mics.py`, `make_kicad_pcb.py` | `scripts/` |
 | `mic_placement.csv` | här (`hardware/`) |
 | Riktiga footprints (`.kicad_mod` / `.pretty`) | `footprints/` |
 
-Kör skripten från `hardware/` så att relativa sökvägar till `mic_placement.csv`
-och `kicad/` stämmer (justera skripten om de antar något annat).
+## Generera kortet
+
+```bash
+python3 hardware/scripts/place_mics.py     # -> hardware/mic_placement.csv
+python3 hardware/scripts/make_kicad_pcb.py # -> hardware/kicad/mic_array.kicad_pcb
+```
+
+Skripten hittar sina filer relativt sig själva och kan köras från vilken mapp som helst.
+`place_mics.py` återskapar exakt samma placering som första utkastet:
+r = 8,5·√(i+0,5) mm, vinkel = i·137,508°, min. avstånd 13,14 mm.
+
+Obs: `make_kicad_pcb.py` skriver över `mic_array.kicad_pcb`. Så fort du börjar
+dra ledningar i KiCad ska du sluta köra skriptet (eller ändra det att skriva till en annan fil).
 
 ## Läge
 

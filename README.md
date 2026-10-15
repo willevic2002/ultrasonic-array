@@ -34,8 +34,8 @@ chirp, matchat filter och beamforming. Idén liknar Sonairs ADAR.
 
 | Del | Status |
 |---|---|
-| Steg 1: en sändare + några mikrofoner på breakout-kort | ✅ Fungerar (utanför detta repo) |
-| Steg 3: eget kort, 16 mikrofoner | 🚧 Utkast. Placering klar, footprints är platshållare, inga ledningar, inget jordplan, ingen sändare |
+| Steg 1: en sändare + en mottagare på en mikrokontroller | ✅ Fungerar (utanför detta repo) |
+| Steg 3: eget kort, 16 mikrofoner | 🚧 Utkast. Placering klar och reproducerbar från skript, footprints är platshållare, inga ledningar, inget jordplan, ingen sändare |
 | `fpga/`: klockgenerator + PDM-inläsning för ett mikrofonpar | 🧪 Simulerad i xsim, **otestad i hårdvara** |
 | `fpga/`: CIC-decimering, 8 datalinjer, länk till Pi | ❌ Inte påbörjat |
 | `fpga/constraints/`: pinnar | ❌ Bara mall, pinnar inte valda |
