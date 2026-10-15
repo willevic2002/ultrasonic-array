@@ -1,3 +1,5 @@
 # tools
 
-Hjälpskript (t.ex. tcl-skript som bygger Vivado-projektet, loggning från Pi). Tomt än så länge.
+Hjälpskript.
+
+- `draw_sketch.py`: ritar `docs/images/device_sketch.svg` (skiss av enheten). Kör igen om placeringen ändras.

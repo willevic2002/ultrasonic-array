@@ -11,5 +11,6 @@
 - `hardware/`: designkontroller i `hardware/tests` (KiCads DRC + nät, parning, avkoppling, avstånd).
   De hittade att U1 låg under sändaren. Spiralen flyttad till r = 8,5·√(i+1) mm, courtyards
   och keepout-zon för sändaren tillagda.
+- Skiss av enheten (`docs/images/device_sketch.svg`, genererad av `tools/draw_sketch.py`).
 - TODO-listan flyttad till GitHub Issues (#1-#14).
 - `software/`: delay-and-sum offline med fokus på punkter (närfält), testad på syntetisk data.

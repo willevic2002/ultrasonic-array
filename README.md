@@ -8,6 +8,11 @@ som ser i 3D (riktning + avstånd) inom en kupol framför sig. Se [docs/notes.md
 > **Lärprojekt.** Det här är ingen certifierad säkerhetsfunktion och ska inte
 > användas som enda skydd mot kollisioner.
 
+![Skiss av sensorenheten](docs/images/device_sketch.svg)
+
+*Skiss: enheten framifrån (skalenlig), från sidan med synfältet, och fyra enheter
+runt en robot. Genereras av `tools/draw_sketch.py` från `hardware/mic_placement.csv`.*
+
 ## Arkitektur
 
 ```
