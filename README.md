@@ -40,7 +40,8 @@ runt en robot. Genereras av `tools/draw_sketch.py` från `hardware/mic_placement
 
 | Del | Status |
 |---|---|
-| Steg 1: en sändare + en mottagare på en mikrokontroller | ✅ Fungerar (utanför detta repo) |
+| Steg 1: färdig HC-SR04-modul avläst med STM32 | ✅ Fungerar (utanför detta repo) |
+| PDM-mikrofonerna (SPH0641LU4H-1) | ❌ Inte testade i hårdvara än |
 | Steg 3: eget kort, 16 mikrofoner | 🚧 Utkast. Placering klar och reproducerbar från skript, designkontroller (DRC + egna) går igenom, footprints är platshållare, inga ledningar, inget jordplan, ingen sändare |
 | `fpga/`: klockgenerator + PDM-inläsning för ett mikrofonpar | 🧪 Simulerad i xsim, **otestad i hårdvara** |
 | `fpga/`: CIC-decimering, 8 datalinjer, länk till Pi | ❌ Inte påbörjat |
