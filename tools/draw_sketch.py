@@ -37,7 +37,7 @@ add(f'<rect x="{cx-b}" y="{cy-b}" width="{2*b}" height="{2*b}" fill="{BOARD}" fi
 for hx, hy in [(38, 38), (-38, 38), (38, -38), (-38, -38)]:
     add(f'<circle cx="{cx+hx*s}" cy="{cy+hy*s}" r="{1.6*s}" fill="#ffffff" stroke="{MUTED}"/>')
 for mx, my in mics:
-    add(f'<rect x="{cx+(mx-1.75)*s:.1f}" y="{cy+(my-1.325)*s:.1f}" width="{3.5*s}" height="{2.65*s}" fill="none" stroke="{INK}" stroke-width="0.8" stroke-dasharray="2 1.5"/>')
+    add(f'<rect x="{cx+(mx-1.325)*s:.1f}" y="{cy+(my-0.77-1.75)*s:.1f}" width="{2.65*s}" height="{3.5*s}" fill="none" stroke="{INK}" stroke-width="0.8" stroke-dasharray="2 1.5"/>')
     add(f'<circle cx="{cx+mx*s:.1f}" cy="{cy+my*s:.1f}" r="2.2" fill="{INK}"/>')
 add(f'<circle cx="{cx}" cy="{cy}" r="{6*s}" fill="none" stroke="{ACCENT}" stroke-dasharray="4 3"/>')
 add(f'<circle cx="{cx}" cy="{cy}" r="{5*s}" fill="{TX}" fill-opacity="0.85" stroke="{INK}"/>')

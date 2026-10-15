@@ -18,9 +18,11 @@ import pytest
 
 HW = Path(__file__).resolve().parent.parent
 PCB = HW / "kicad" / "mic_array.kicad_pcb"
+TEST_PCB = HW / "kicad" / "mic_test.kicad_pcb"
 
 CENTER = (100.0, 100.0)  # kortets mitt i make_kicad_pcb.py
-MIC_BODY = (3.5, 2.65)  # SPH0641LU4H-1, mm
+MIC_BODY = (2.65, 3.5)  # SPH0641LU4H-1 (bredd x höjd i footprinten), mm
+PORT_DY = 0.77  # ljudporten sitter 0,77 mm från kapselns mitt
 CAP_BODY = (1.6 + 0.9, 0.95)  # 0603 inkl. pads, ungefär
 TX_DIAMETER = 10.0  # MA40S4S, mm. VERIFIERA när ersättaren är vald (#4)
 TX_CLEARANCE = 1.0  # luft runt sändaren, mm
@@ -52,8 +54,8 @@ def child(node, name):
     return found[0] if found else None
 
 
-def load_board():
-    root = parse_sexpr(PCB.read_text())
+def load_board(path=PCB):
+    root = parse_sexpr(path.read_text())
     parts = {}
     for fp in children(root, "footprint"):
         ref = next(p[2] for p in children(fp, "property") if p[1] == "Reference")
@@ -132,7 +134,8 @@ def test_positions_match_placement_csv():
         for row in csv.DictReader(f):
             m = MICS[row["ref"]]
             assert m["x"] == pytest.approx(CENTER[0] + float(row["x_mm"]), abs=1e-3), row["ref"]
-            assert m["y"] == pytest.approx(CENTER[1] + float(row["y_mm"]), abs=1e-3), row["ref"]
+            # positionerna i csv:n är ljudportarnas, inte kapslarnas
+            assert m["y"] + PORT_DY == pytest.approx(CENTER[1] + float(row["y_mm"]), abs=1e-3), row["ref"]
             assert m["pads"]["1"] == row["data_net"], row["ref"]
             assert m["pads"]["2"] == ("GND" if row["SEL_pin"] == "GND" else "+3V3"), row["ref"]
 
@@ -170,11 +173,25 @@ ALLOWED_DRC = {"lib_footprint_mismatch", "lib_footprint_issues"}
 
 
 @pytest.mark.skipif(shutil.which("kicad-cli") is None, reason="kicad-cli saknas")
-def test_kicad_drc(tmp_path):
+@pytest.mark.parametrize("board", [PCB, TEST_PCB], ids=lambda p: p.stem)
+def test_kicad_drc(tmp_path, board):
     report = tmp_path / "drc.json"
     subprocess.run(["kicad-cli", "pcb", "drc", "--format", "json", "--severity-all",
-                    "-o", str(report), str(PCB)], check=True, capture_output=True)
+                    "-o", str(report), str(board)], check=True, capture_output=True)
     violations = json.loads(report.read_text())["violations"]
     errors = [f"{v['type']}: {v['description']} {[i['description'] for i in v['items']]}"
               for v in violations if v["type"] not in ALLOWED_DRC]
     assert not errors, "\n".join(errors)
+
+
+def test_test_board_pairs_two_mics_on_pmod():
+    parts, _ = load_board(TEST_PCB)
+    mics = {r: p for r, p in parts.items() if r.startswith("U")}
+    assert sorted(m["pads"]["2"] for m in mics.values()) == ["+3V3", "GND"]
+    assert {m["pads"]["1"] for m in mics.values()} == {"DATA1"}
+    for ref, m in mics.items():
+        assert (m["pads"]["3"], m["pads"]["4"], m["pads"]["5"]) == ("GND", "CLK", "+3V3"), ref
+        assert sorted(parts[f"C{ref[1:]}"]["pads"].values()) == ["+3V3", "GND"], ref
+    # Digilent Pmod 1x6: 1-4 signaler, 5 GND, 6 VCC
+    j1 = parts["J1"]["pads"]
+    assert (j1["1"], j1["2"], j1["5"], j1["6"]) == ("CLK", "DATA1", "GND", "+3V3")

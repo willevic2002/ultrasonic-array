@@ -6,7 +6,7 @@ Licens: CERN-OHL-P-2.0 (se [LICENSE](LICENSE)).
 
 | Fil | Plats |
 |---|---|
-| `mic_array.kicad_pcb` | `kicad/` |
+| `mic_array.kicad_pcb` (16 mikrofoner), `mic_test.kicad_pcb` (testkort, 2 mikrofoner) | `kicad/` |
 | `place_mics.py`, `make_kicad_pcb.py` | `scripts/` |
 | `mic_placement.csv` | här (`hardware/`) |
 | Riktiga footprints (`.kicad_mod` / `.pretty`) | `footprints/` |
@@ -15,13 +15,18 @@ Licens: CERN-OHL-P-2.0 (se [LICENSE](LICENSE)).
 
 ```bash
 python3 hardware/scripts/place_mics.py     # -> hardware/mic_placement.csv
-python3 hardware/scripts/make_kicad_pcb.py # -> hardware/kicad/mic_array.kicad_pcb
+python3 hardware/scripts/make_kicad_pcb.py # -> hardware/kicad/mic_array.kicad_pcb + mic_test.kicad_pcb
 ```
 
 Skripten hittar sina filer relativt sig själva och kan köras från vilken mapp som helst.
 `place_mics.py` placerar mikrofonerna i en Vogel-spiral: r = 8,5·√(i+1) mm,
 vinkel = i·137,508°. Min. avstånd 13,62 mm, innersta mikrofonen 8,5 mm från mitten.
 Första utkastet hade √(i+0,5), men då hamnade U1 under sändaren.
+
+Mikrofonerna använder KiCads footprint `Sensor_Audio:Knowles_LGA-5_3.5x2.65mm`
+(efter Knowles datablad rev B), med 0,5 mm hål under ljudporten och jordring runt det.
+Porten sitter 0,77 mm från kapselns mitt. Footprinten placeras så att **porten**
+hamnar på positionen i `mic_placement.csv`, så csv:n anger de akustiska positionerna.
 
 `make_kicad_pcb.py` lägger också in courtyards och en keepout-zon (`TX_KEEPOUT`,
 radie 6 mm) i mitten där sändaren ska sitta. Radien förutsätter MA40S4S (Ø10 mm)
@@ -49,8 +54,16 @@ dra ledningar i KiCad ska du sluta köra skriptet (eller ändra det att skriva t
 
 - 16 mikrofoner i Vogel-spiral, min. avstånd 13,6 mm, kort 84 x 84 mm
 - Courtyards och keepout för sändaren i mitten
-- Mikrofon-footprints är **platshållare med gissade pads**, måste bytas
-- Inga ledningar, inget jordplan, ingen sändare/drivare, inga porthål
+- Riktig mikrofon-footprint med porthål
+- Inga ledningar, inget jordplan, ingen sändare/drivare
+
+## Testkort (`mic_test.kicad_pcb`)
+
+30 x 22 mm med 2 mikrofoner på samma DATA-linje (U1 SEL=GND, U2 SEL=VDD), 14 mm isär,
+en 100 nF per mikrofon och en 1x6 stiftlist med 2,54 mm delning enligt Digilents
+Pmod-standard: 1 CLK, 2 DATA, 5 GND, 6 3V3. Passar i breadboard och i Boolean-kortets
+Pmod-kontakt (verifiera pinout och 3,3 V). Syftet är att testa footprint, porthål,
+SEL-parning och VHDL-inläsningen innan 16-mikrofonskortet beställs.
 
 Öppna punkter finns i [../TODO.md](../TODO.md).
 
