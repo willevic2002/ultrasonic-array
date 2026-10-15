@@ -1,0 +1,42 @@
+# KiCad
+*-backups/
+*.kicad_prl
+fp-info-cache
+_autosave-*
+*.lck
+\#auto_saved_files\#
+*.bak
+
+# Vivado (spara bara källor, constraints och tcl-skript, inte projektkataloger)
+.Xil/
+*.jou
+*.log
+*.str
+*.cache/
+*.hw/
+*.runs/
+*.sim/
+*.gen/
+*.ip_user_files/
+*.wdb
+*.pb
+xsim.dir/
+webtalk*
+vivado*.backup.*
+fpga/sim/build/
+
+# GHDL
+*.cf
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+*.egg-info/
+
+# Mätdata (stora filer, lägg inte i git)
+data/
+
+# Lokala verktygsfiler
+.claude/
