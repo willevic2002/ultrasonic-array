@@ -81,7 +81,7 @@ python -m beamforming data.npz --mics ../hardware/mic_placement.csv --range 1.0
 
 ## TODO
 
-Se [TODO.md](TODO.md). Ändringar loggas i [CHANGELOG.md](CHANGELOG.md).
+Öppna punkter finns som [GitHub Issues](https://github.com/willevic2002/ultrasonic-array/issues) (översikt i [TODO.md](TODO.md)). Ändringar loggas i [CHANGELOG.md](CHANGELOG.md).
 
 ## Licens
 

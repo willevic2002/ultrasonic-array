@@ -8,4 +8,5 @@
   `pdm_pair_capture` (två mikrofoner per datalinje) med testbänk. Simulerad, otestad i hårdvara.
 - `hardware/`: första utkastet av kortet (`mic_array.kicad_pcb`), `make_kicad_pcb.py` och nytt
   `place_mics.py` som återskapar `mic_placement.csv` exakt.
+- TODO-listan flyttad till GitHub Issues (#1-#14).
 - `software/`: delay-and-sum offline med fokus på punkter (närfält), testad på syntetisk data.
