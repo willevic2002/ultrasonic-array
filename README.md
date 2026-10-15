@@ -2,7 +2,8 @@
 
 Egenbyggd 3D-ultraljudssensor för min robot: en 40 kHz-sändare och en array med
 16 digitala MEMS-mikrofoner (PDM). Riktning och avstånd till hinder bestäms med
-chirp, matchat filter och beamforming. Idén liknar Sonairs ADAR.
+chirp, matchat filter och beamforming. Idén liknar Sonairs ADAR: ett platt kort
+som ser i 3D (riktning + avstånd) inom en kupol framför sig. Se [docs/notes.md](docs/notes.md).
 
 > **Lärprojekt.** Det här är ingen certifierad säkerhetsfunktion och ska inte
 > användas som enda skydd mot kollisioner.
