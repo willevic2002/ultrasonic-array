@@ -19,8 +19,26 @@ python3 hardware/scripts/make_kicad_pcb.py # -> hardware/kicad/mic_array.kicad_p
 ```
 
 Skripten hittar sina filer relativt sig själva och kan köras från vilken mapp som helst.
-`place_mics.py` återskapar exakt samma placering som första utkastet:
-r = 8,5·√(i+0,5) mm, vinkel = i·137,508°, min. avstånd 13,14 mm.
+`place_mics.py` placerar mikrofonerna i en Vogel-spiral: r = 8,5·√(i+1) mm,
+vinkel = i·137,508°. Min. avstånd 13,62 mm, innersta mikrofonen 8,5 mm från mitten.
+Första utkastet hade √(i+0,5), men då hamnade U1 under sändaren.
+
+`make_kicad_pcb.py` lägger också in courtyards och en keepout-zon (`TX_KEEPOUT`,
+radie 6 mm) i mitten där sändaren ska sitta. Radien förutsätter MA40S4S (Ø10 mm)
+och ska ändras om en annan sändare väljs (#4).
+
+## Testa designen
+
+```bash
+pytest hardware/tests
+```
+
+Kör KiCads DRC via `kicad-cli` och kontrollerar det DRC inte kan veta utan schema:
+nät per mikrofon, att varje DATA-par har en GND- och en VDD-SEL, avkoppling,
+minsta avstånd, att allt ryms på kortet och att mitten är fri för sändaren.
+Tillåtna DRC-avvikelser i utkastet: oanslutna nät (inga ledningar än) och
+platshållar-footprints som saknas i bibliotek. När det finns ett schema kan
+parity och ERC ta över en del av kontrollerna.
 
 Obs: `make_kicad_pcb.py` skriver över `mic_array.kicad_pcb`. Så fort du börjar
 dra ledningar i KiCad ska du sluta köra skriptet (eller ändra det att skriva till en annan fil).
@@ -29,7 +47,8 @@ dra ledningar i KiCad ska du sluta köra skriptet (eller ändra det att skriva t
 
 `mic_array.kicad_pcb` är ett **utkast** genererat av `make_kicad_pcb.py`:
 
-- 16 mikrofoner i Vogel-spiral, min. avstånd ca 13 mm, kort 84 x 84 mm
+- 16 mikrofoner i Vogel-spiral, min. avstånd 13,6 mm, kort 84 x 84 mm
+- Courtyards och keepout för sändaren i mitten
 - Mikrofon-footprints är **platshållare med gissade pads**, måste bytas
 - Inga ledningar, inget jordplan, ingen sändare/drivare, inga porthål
 

@@ -35,7 +35,7 @@ chirp, matchat filter och beamforming. Idén liknar Sonairs ADAR.
 | Del | Status |
 |---|---|
 | Steg 1: en sändare + en mottagare på en mikrokontroller | ✅ Fungerar (utanför detta repo) |
-| Steg 3: eget kort, 16 mikrofoner | 🚧 Utkast. Placering klar och reproducerbar från skript, footprints är platshållare, inga ledningar, inget jordplan, ingen sändare |
+| Steg 3: eget kort, 16 mikrofoner | 🚧 Utkast. Placering klar och reproducerbar från skript, designkontroller (DRC + egna) går igenom, footprints är platshållare, inga ledningar, inget jordplan, ingen sändare |
 | `fpga/`: klockgenerator + PDM-inläsning för ett mikrofonpar | 🧪 Simulerad i xsim, **otestad i hårdvara** |
 | `fpga/`: CIC-decimering, 8 datalinjer, länk till Pi | ❌ Inte påbörjat |
 | `fpga/constraints/`: pinnar | ❌ Bara mall, pinnar inte valda |
@@ -77,7 +77,14 @@ python -m beamforming data.npz --mics ../hardware/mic_placement.csv --range 1.0
 
 ### Kortet
 
-Öppna `hardware/kicad/mic_array.kicad_pcb` i KiCad 10. Se [hardware/README.md](hardware/README.md).
+Öppna `hardware/kicad/mic_array.kicad_pcb` i KiCad 10. Designkontroller (KiCads DRC
+plus egna kontroller):
+
+```bash
+pytest hardware/tests
+```
+
+Se [hardware/README.md](hardware/README.md).
 
 ## TODO
 
