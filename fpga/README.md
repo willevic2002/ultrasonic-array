@@ -7,7 +7,8 @@ VHDL för Real Digital Boolean Board (Spartan-7, `xc7s50csga324-1`), Vivado 2026
 | `src/pdm_clock_gen.vhd` | Mikrofonklocka från 100 MHz: 1,5625 MHz vid start, sen 3,125 MHz | Simulerad |
 | `src/pdm_pair_capture.vhd` | Läser en DATA-linje som delas av två mikrofoner | Simulerad |
 | `sim/tb_pdm_pair_capture.vhd` | Testbänk med modell av två mikrofoner | – |
-| `sim/tb.wcfg` | Vågformsvy: mic_clk, sample/valid/bit per kanal, räknare | – |
+| `src/mic_array_pkg.vhd` | Gemensamma typer (`sample_array`) | – |
+| `sim/tb_pdm_pair_capture.wcfg` | Vågformsvy: mic_clk, sample/valid/bit per kanal, räknare | – |
 | `constraints/boolean_mic_array.xdc` | Pinnmall, **inga pinnar valda än** | Mall |
 
 Inget av detta är testat i hårdvara.
@@ -15,7 +16,8 @@ Inget av detta är testat i hårdvara.
 ## Simulera
 
 ```bash
-fpga/sim/run_xsim.sh   # exit 0 och "PASS: ..." om allt stämmer
+fpga/sim/run_xsim.sh                       # alla testbänkar, exit 0 om alla ger PASS
+fpga/sim/run_xsim.sh tb_pdm_pair_capture   # bara en
 ```
 
 Skriptet sourcar `/tools/Xilinx/2026.1/Vivado/settings64.sh`. Sätt `VIVADO_SETTINGS`
@@ -25,11 +27,11 @@ bara elaboreringen som ser watchdog-raden, den betyder inte att testet fallerat.
 För att titta på vågformerna (efter `run_xsim.sh`):
 
 ```bash
-cd fpga/sim/build && source /tools/Xilinx/2026.1/Vivado/settings64.sh
-xsim tb -gui    # tb.wcfg laddas automatiskt, kör sen `run all`
+cd fpga/sim/build/tb_pdm_pair_capture && source /tools/Xilinx/2026.1/Vivado/settings64.sh
+xsim tb_pdm_pair_capture -gui    # <tb>.wcfg laddas automatiskt, kör sen `run all`
 ```
 
-Ändrar du vyn i GUI:t, spara den till `fpga/sim/tb.wcfg` (inte `build/`) så kommer den med i git.
+Ändrar du vyn i GUI:t, spara den till `fpga/sim/<tb>.wcfg` (inte `build/`) så kommer den med i git.
 
 Testbänken kollar klockperioden i båda lägena och att 200 bitar per kanal läses
 korrekt. Med en för lång data-valid-tid (t.ex. 150 ns) fallerar den när klockan
