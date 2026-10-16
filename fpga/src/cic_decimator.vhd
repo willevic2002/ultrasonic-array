@@ -4,7 +4,9 @@
 -- integratorer i kedja (nya värden, bit x[n] ingår i y[n]), d[k] = y[32k+31],
 -- fyra kammar, ut = mättning(c >> 5). Instansieras 16 gånger, så kammarna
 -- delar EN subtraherare och körs sekventiellt (4 cykler per utsampel; det
--- finns minst 32 systemcykler mellan ingående bitar).
+-- finns minst 32 systemcykler mellan ingående bitar). Integratorerna uppdateras
+-- också en per cykel (4 cykler per bit), så att den längsta vägen är en
+-- adderare i stället för fyra i följd. Resultatet blir detsamma.
 --
 -- STATUS: simulerad, OTESTAT i hårdvara.
 
@@ -32,10 +34,12 @@ architecture rtl of cic_decimator is
   signal cnt   : unsigned(4 downto 0) := (others => '0');
   signal busy  : std_logic := '0';
   signal stage : unsigned(1 downto 0) := (others => '0');
+  signal ip    : natural range 0 to 3 := 0;  -- integrator som uppdateras nästa cykel (0 = vilar)
+  signal outp  : std_logic := '0';  -- v har kamutvärdet, mätta och lägg ut nästa cykel
 begin
   process (clk)
     variable x    : signed(W - 1 downto 0);
-    variable i1, i2, i3, i4, c : signed(W - 1 downto 0);
+    variable c    : signed(W - 1 downto 0);
     variable sh   : signed(W - 1 downto 0);
   begin
     if rising_edge(clk) then
@@ -46,20 +50,27 @@ begin
         cnt   <= (others => '0');
         busy  <= '0';
         stage <= (others => '0');
+        ip    <= 0;
+        outp  <= '0';
         sample <= (others => '0');
       else
         if bit_valid = '1' then
           if bit_in = '1' then x := to_signed(1, W); else x := to_signed(-1, W); end if;
-          i1 := integ(0) + x;
-          i2 := integ(1) + i1;
-          i3 := integ(2) + i2;
-          i4 := integ(3) + i3;
-          integ <= (i1, i2, i3, i4);
-          cnt   <= cnt + 1;
-          if cnt = 31 then
-            v     <= i4;
-            busy  <= '1';
-            stage <= (others => '0');
+          integ(0) <= integ(0) + x;
+          ip <= 1;
+        elsif ip /= 0 then
+          -- integ(ip - 1) har redan sitt nya värde, precis som i en kedja i samma cykel.
+          integ(ip) <= integ(ip) + integ(ip - 1);
+          if ip = 3 then
+            ip  <= 0;
+            cnt <= cnt + 1;
+            if cnt = 31 then
+              v     <= integ(3) + integ(2);
+              busy  <= '1';
+              stage <= (others => '0');
+            end if;
+          else
+            ip <= ip + 1;
           end if;
         end if;
 
@@ -70,14 +81,20 @@ begin
           stage <= stage + 1;
           if stage = 3 then
             busy <= '0';
-            sh := shift_right(c, 5);  -- aritmetiskt, avrundning nedåt
-            if sh > 32767 then
-              sample <= to_signed(32767, 16);
-            else
-              sample <= resize(sh, 16);
-            end if;
-            sample_valid <= '1';
+            outp <= '1';
           end if;
+        end if;
+
+        -- Mättningen får en egen cykel, så att subtraktion och jämförelse inte ligger i följd.
+        if outp = '1' then
+          outp <= '0';
+          sh := shift_right(v, 5);  -- aritmetiskt, avrundning nedåt
+          if sh > 32767 then
+            sample <= to_signed(32767, 16);
+          else
+            sample <= resize(sh, 16);
+          end if;
+          sample_valid <= '1';
         end if;
       end if;
     end if;

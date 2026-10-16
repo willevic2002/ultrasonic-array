@@ -29,7 +29,7 @@ def main() -> None:
     ap.add_argument("--pings", type=int, default=1)
     ap.add_argument("--out", required=True, help=".npz-fil (signals, fs)")
     ap.add_argument("--fake", action="store_true", help="syntetisk FPGA, ingen hårdvara")
-    ap.add_argument("--speed", type=int, default=8_000_000, help="SPI-klocka [Hz], högst 10 MHz")
+    ap.add_argument("--speed", type=int, default=4_000_000, help="SPI-klocka [Hz], högst 8 MHz")
     ap.add_argument("--samples", type=int, default=2048)
     a = ap.parse_args()
 

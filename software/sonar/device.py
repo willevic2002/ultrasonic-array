@@ -56,7 +56,7 @@ class SonarDevice:
         return self.read_capture(n_samples)
 
 
-def open_spidev(bus: int = 0, device: int = 0, speed_hz: int = 8_000_000) -> SonarDevice:
+def open_spidev(bus: int = 0, device: int = 0, speed_hz: int = 4_000_000) -> SonarDevice:
     import spidev  # bara på Pi:n
 
     spi = spidev.SpiDev()

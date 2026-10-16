@@ -2,7 +2,7 @@
 --
 -- Källan ger en sample_valid var 1024:e cykel (97,66 kHz). Utsampel n, kanal c
 -- har värdet (n*16 + c) mod 2^16, så innehållet i minnet visar exakt vilka
--- sample_valid som spelades in. SPI-mastern är en BFM vid 10 MHz, läge 0.
+-- sample_valid som spelades in. SPI-mastern är en BFM vid 8 MHz, läge 0.
 --
 -- Kontrollerar:
 --   * STATUS: ID 0xA, READY låg utan ultrasonic och under SETTLE_CYCLES, hög efter
@@ -11,6 +11,7 @@
 --   * blocket = N_SAMPLES på varandra följande sample_valid efter PING
 --   * READ från adress 0, mitten, sista ordet, hela minnet, olika bitstorlekar
 --   * CS-avbrott mitt i byte (kommando, PING, svar) stör inte nästa transaktion
+--   * störpulser på 6 ns på SCLK ignoreras
 --   * MISO hög-Z när CS är hög; MISO stabil minst 15 ns före varje stigande SCLK
 --   * andra PING skriver över och DATA_VALID nollas direkt
 
@@ -25,7 +26,7 @@ end entity;
 
 architecture sim of tb_capture_spi is
   constant T_SYS    : time := 10 ns;
-  constant T_HALF   : time := 50 ns;   -- SCLK 10 MHz
+  constant T_HALF   : time := 62.5 ns; -- SCLK 8 MHz, protokollets max
   constant T_SETUP  : time := 15 ns;   -- krävd MISO-marginal före stigande SCLK
   constant N_SAMPLES    : positive := 64;
   constant SETTLE_CYCLES : natural := 500;
@@ -42,6 +43,8 @@ architecture sim of tb_capture_spi is
   signal pcount   : natural := 0;   -- antal utsampel hittills
   signal n_chirp  : natural := 0;
   signal k0       : natural := 0;   -- första inspelade utsampel
+  signal sv_d     : std_logic := '0';
+  signal glitch   : boolean := false;  -- BFM lägger 6 ns störpulser på SCLK
   signal min_margin : time := 1 ms;
 
   function expected(a : natural; k : natural) return std_logic_vector is
@@ -83,7 +86,9 @@ begin
   mon : process (clk)
   begin
     if rising_edge(clk) then
+      sv_d <= sample_valid;
       if chirp_start = '1' then
+        assert sv_d = '1' report "FAIL: chirp_start inte i fas med sample_valid" severity failure;
         n_chirp <= n_chirp + 1;
         k0 <= pcount;
       end if;
@@ -93,7 +98,7 @@ begin
   -- MISO-marginal: tid sedan senaste ändring vid varje stigande SCLK.
   margin : process (sclk)
   begin
-    if rising_edge(sclk) and cs_n = '0' and miso'last_event < min_margin then
+    if rising_edge(sclk) and cs_n = '0' and not glitch and miso'last_event < min_margin then
       min_margin <= miso'last_event;
     end if;
   end process;
@@ -133,11 +138,21 @@ begin
       rxd := (others => '0');
       for i in 0 to nbits - 1 loop
         mosi <= tx(7 - i);
-        wait for T_HALF - T_SETUP;
+        if glitch then  -- 6 ns puls mitt i låg- och högfasen, kortare än filtret
+          wait for 20 ns; sclk <= '1'; wait for 6 ns; sclk <= '0';
+          wait for T_HALF - T_SETUP - 26 ns;
+        else
+          wait for T_HALF - T_SETUP;
+        end if;
         rxd(7 - i) := miso;
         wait for T_SETUP;
         sclk <= '1';
-        wait for T_HALF;
+        if glitch then
+          wait for 20 ns; sclk <= '0'; wait for 6 ns; sclk <= '1';
+          wait for T_HALF - 26 ns;
+        else
+          wait for T_HALF;
+        end if;
         sclk <= '0';
       end loop;
     end procedure;
@@ -236,7 +251,7 @@ begin
 
     -- 5. Riktig PING: en chirp_start, CAPTURING, sedan DATA_VALID.
     ping;
-    wait_clk(5);
+    wait_clk(1100);                     -- chirpen väntar på nästa sample_valid
     assert n_chirp = 1 report "FAIL: chirp_start saknas/dubbel efter PING" severity failure;
     status(st);
     assert st = x"A2" report "FAIL: status under inspelning " & to_hstring(st) severity failure;
@@ -274,7 +289,7 @@ begin
     -- 8. Andra PING skriver över; DATA_VALID nollas direkt.
     seen := k0;
     ping;
-    wait_clk(5);
+    wait_clk(1100);
     assert n_chirp = 2 report "FAIL: andra chirp_start saknas" severity failure;
     status(st);
     assert st = x"A2" report "FAIL: DATA_VALID inte nollad " & to_hstring(st) severity failure;
@@ -286,6 +301,14 @@ begin
     assert min_margin >= T_SETUP
       report "FAIL: MISO-marginal " & time'image(min_margin) severity failure;
     report "min MISO-marginal före stigande SCLK: " & time'image(min_margin);
+
+    -- 9. Störpulser på SCLK (ringning) får inte förskjuta bitarna.
+    glitch <= true;
+    status(st);
+    assert st = x"A5" report "FAIL: status med glitchar " & to_hstring(st) severity failure;
+    read_check(0, 64, k0);
+    read_check(DEPTH - 16, 16, k0);
+    glitch <= false;
     report "PASS: capture_spi, k0 = " & integer'image(k0);
     stop;
     wait;

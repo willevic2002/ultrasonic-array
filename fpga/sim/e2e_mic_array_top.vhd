@@ -30,7 +30,7 @@ end entity;
 architecture sim of e2e_mic_array_top is
   constant T_SYS  : time := 10 ns;
   constant T_DV   : time := 40 ns;    -- databladets max för tDD
-  constant T_SCLK : time := 100 ns;   -- 10 MHz, protokollets max
+  constant T_SCLK : time := 125 ns;   -- 8 MHz, protokollets max
   constant CHUNK  : positive := 1024; -- ord per READ, som Pi:n
 
   signal clk      : std_logic := '0';

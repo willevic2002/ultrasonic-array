@@ -1,11 +1,13 @@
 -- capture_spi: inspelning till BRAM och SPI-kommandon (PING/STATUS/READ).
 -- Se docs/pipeline.md §5 och §6.
 --
--- PING (när READY): chirp_start, sedan lagras de N_SAMPLES nästa sample_valid
--- till minnet på adress sampel*16 + kanal. De 16 kanalerna skrivs en per cykel
--- efter pulsen (samples är stabila mellan pulserna, ca 1024 cykler).
--- En sample_valid i samma cykel som PING godtas räknas inte med.
--- chirp_start är registrerad, dvs. synlig cykeln efter att PING togs emot.
+-- PING (när READY): vid nästa sample_valid kommer chirp_start, och de N_SAMPLES
+-- sample_valid som följer efter den lagras till minnet på adress sampel*16 + kanal.
+-- Att chirpen väntar på ett sampel gör fördröjningen chirp -> sampel 0 exakt
+-- lika stor varje gång (annars varierar den upp till ett sampel med PINGens fas).
+-- De 16 kanalerna skrivs en per cykel efter pulsen (samples är stabila mellan
+-- pulserna, ca 1024 cykler). chirp_start är registrerad, dvs. synlig cykeln
+-- efter den sample_valid den väntade på.
 --
 -- READY = ultrasonic hög sammanhängande i SETTLE_CYCLES och ingen inspelning.
 --
@@ -70,6 +72,7 @@ architecture rtl of capture_spi is
 
   signal settle_cnt : natural range 0 to SETTLE_CYCLES := 0;
   signal cap_active, data_valid, busy : std_logic := '0';
+  signal armed : std_logic := '0';  -- PING mottagen, väntar på sample_valid för chirpen
   signal ping_toggle : std_logic := '0';  -- växlar vid varje godkänd PING, så Pi:n ser om den kom fram
   signal ready  : std_logic;
   signal sidx   : natural range 0 to N_SAMPLES - 1 := 0;
@@ -119,7 +122,12 @@ begin
       end if;
 
       -- Skrivmotor: en sample_valid -> 16 skrivningar.
-      if cap_active = '1' then
+      if armed = '1' then
+        if sample_valid = '1' then
+          chirp_start <= '1';
+          armed       <= '0';
+        end if;
+      elsif cap_active = '1' then
         if busy = '0' then
           if sample_valid = '1' then busy <= '1'; ch <= 0; end if;
         else
@@ -149,7 +157,7 @@ begin
           if rx_byte = CMD_STATUS then
             tx_byte <= x"A" & ping_toggle & data_valid & cap_active & ready;
           elsif rx_byte = CMD_PING and ready = '1' then
-            chirp_start <= '1';
+            armed       <= '1';
             ping_toggle <= not ping_toggle;
             cap_active  <= '1';
             data_valid  <= '0';
@@ -176,7 +184,7 @@ begin
 
       if rst = '1' then
         settle_cnt <= 0;
-        cap_active <= '0'; data_valid <= '0'; busy <= '0'; ping_toggle <= '0';
+        cap_active <= '0'; data_valid <= '0'; busy <= '0'; ping_toggle <= '0'; armed <= '0';
         sidx <= 0; wr_en <= '0'; tx_load <= '0';
       end if;
     end if;

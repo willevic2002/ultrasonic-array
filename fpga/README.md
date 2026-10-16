@@ -24,11 +24,11 @@ Inget av detta är testat i hårdvara.
 ## Hela kedjan och bygget
 
 ```bash
-PYTHON=<python med numpy> fpga/sim/run_e2e.sh   # eko -> FPGA -> SPI -> bitexakt + avstånd/riktning
+fpga/sim/run_e2e.sh                             # eko -> FPGA -> SPI -> bitexakt + avstånd/riktning
 fpga/tools/build.sh                             # bitström i fpga/build/, rapporter där också
 ```
 
-Senaste bygget: timing uppfylls (WNS 0,996 ns vid 100 MHz). 2 927 LUT (9 %), 3 901 vippor (6 %),
+Senaste bygget: timing uppfylls (WNS 3,97 ns vid 100 MHz). 2 500 LUT (8 %), 3 999 vippor (6 %),
 16 BRAM36 (21 %), 0 DSP.
 
 ## Simulera

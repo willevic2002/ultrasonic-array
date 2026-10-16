@@ -40,6 +40,9 @@ architecture rtl of mic_array_top is
   signal samples       : sample_array;
   signal samples_valid : std_logic_vector(N_CH - 1 downto 0);
   signal chirp_start   : std_logic;
+  signal rst_clk, rst_capture, rst_chirp : std_logic := '1';  -- lokala reset-register, se g_line
+  attribute keep : string;
+  attribute keep of rst_clk, rst_capture, rst_chirp : signal is "true";
 begin
   process (clk)
   begin
@@ -52,22 +55,37 @@ begin
     end if;
   end process;
 
+  rst_clk     <= rst when rising_edge(clk);
+  rst_capture <= rst when rising_edge(clk);
+  rst_chirp   <= rst when rising_edge(clk);
+
   u_clk : entity work.pdm_clock_gen
     generic map (HALF_PERIOD_START => 32, HALF_PERIOD_RUN => 16, STARTUP_CYCLES => STARTUP_CYCLES)
-    port map (clk => clk, rst => rst, mic_clk => mic_clk,
+    port map (clk => clk, rst => rst_clk, mic_clk => mic_clk,
               sample_r => sample_r, sample_f => sample_f, ultrasonic => ultrasonic);
 
+  -- Varje instans får ett eget reset-register (rst_l) nära sig, i stället för att ett
+  -- register driver ca 3900 vippor över hela chipet. KEEP hindrar Vivado från att slå
+  -- ihop dem igen. Att olika delar släpper reset en cykel isär spelar ingen roll.
   g_line : for k in 0 to 7 generate
+    signal rst_l : std_logic := '1';
+    attribute keep of rst_l : signal is "true";
+  begin
+    rst_l <= rst when rising_edge(clk);
     u_cap : entity work.pdm_pair_capture
-      port map (clk => clk, rst => rst, pdm_data => pdm_data(k),
+      port map (clk => clk, rst => rst_l, pdm_data => pdm_data(k),
                 sample_r => sample_r, sample_f => sample_f,
                 bit_r => bits(2 * k),     valid_r => bits_valid(2 * k),
                 bit_f => bits(2 * k + 1), valid_f => bits_valid(2 * k + 1));
   end generate;
 
   g_cic : for ch in 0 to N_CH - 1 generate
+    signal rst_l : std_logic := '1';
+    attribute keep of rst_l : signal is "true";
+  begin
+    rst_l <= rst when rising_edge(clk);
     u_cic : entity work.cic_decimator
-      port map (clk => clk, rst => rst, bit_in => bits(ch), bit_valid => bits_valid(ch),
+      port map (clk => clk, rst => rst_l, bit_in => bits(ch), bit_valid => bits_valid(ch),
                 sample => samples(ch), sample_valid => samples_valid(ch));
   end generate;
 
@@ -75,12 +93,12 @@ begin
   -- kanal 1 har ett nytt sampel har alla 16 det. Värdena står still i ca 10 µs.
   u_capture : entity work.capture_spi
     generic map (N_SAMPLES => N_SAMPLES, SETTLE_CYCLES => SETTLE_CYCLES)
-    port map (clk => clk, rst => rst, ultrasonic => ultrasonic,
+    port map (clk => clk, rst => rst_capture, ultrasonic => ultrasonic,
               samples => samples, sample_valid => samples_valid(1),
               chirp_start => chirp_start,
               spi_sclk => spi_sclk, spi_cs_n => spi_cs_n, spi_mosi => spi_mosi, spi_miso => spi_miso);
 
   u_chirp : entity work.chirp_gen
     generic map (DURATION_CYCLES => CHIRP_CYCLES)
-    port map (clk => clk, rst => rst, start => chirp_start, busy => open, tx_p => tx_p, tx_n => tx_n);
+    port map (clk => clk, rst => rst_chirp, start => chirp_start, busy => open, tx_p => tx_p, tx_n => tx_n);
 end architecture;

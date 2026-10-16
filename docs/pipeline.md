@@ -72,20 +72,22 @@ visar om det räcker. Annars: CIC ÷16 + FIR ÷2.
 - `capture_spi` tar emot 16 sampel samtidigt (`samples`, typ `sample_array` i
   `mic_array_pkg`) med en `sample_valid`-puls per utsampel (97,66 kHz). Värdena är
   stabila mellan pulserna.
-- Vid PING: `chirp_start` samma cykel, sedan skrivs de `N_SAMPLES` nästa utsamplen till BRAM.
+- Vid PING: `chirp_start` kommer vid nästa `sample_valid` (högst ca 10 µs senare), och de
+  `N_SAMPLES` utsampel som följer efter den skrivs till BRAM.
   Adress = `sampel * 16 + kanal`, 16 bitar per ord.
 - Fördröjningen från chirpstart till sampel 0 (plus CIC:ens gruppfördröjning) är konstant.
-  Den mäts i simuleringen av hela kedjan (`fpga/sim/run_e2e.sh`): 0,3-1,3 sampel beroende på
-  var i decimeringsperioden PINGen kommer. **`LATENCY_SAMPLES = 0.8`** (±0,9 mm i avstånd),
+  Eftersom chirpen startar i fas med ett sampel är den exakt lika stor varje gång. Uppmätt i
+  `fpga/sim/run_e2e.sh` (samma värde med olika tidpunkt för PING): **`LATENCY_SAMPLES = 1.0`**,
   i `software/sonar/protocol.py`.
 
 ## 6. SPI-protokoll (Pi är master)
 
 - Läge 0 (CPOL = 0, CPHA = 0), MSB först, `spi_cs_n` aktiv låg, **SCLK högst 8 MHz**
-  (FPGA:n översamplar SCLK med 100 MHz; MISO kommer upp till ca 40 ns efter fallande flank,
-  inklusive utgångsbufferten). Simuleringen kör 10 MHz. Börja på 1-4 MHz vid första testet.
-- Sätt ett serieresistor på 33-100 Ω i SCLK nära Pi:n. FPGA:n har inget glitchfilter, så
-  ringningar på en lång kabel kan räknas som en extra flank och förskjuta alla bitar.
+  (FPGA:n översamplar SCLK med 100 MHz och filtrerar den; MISO ändras upp till 40 ns efter
+  fallande flank, plus utgångsbufferten). Simuleringen kör 10 MHz. Börja på 1-4 MHz vid första testet.
+- FPGA:n räknar en SCLK-flank först när två sampel i rad (10 ns isär) har den nya nivån, så
+  störpulser kortare än ca 10 ns ignoreras. Ett serieresistor på 33-100 Ω i SCLK nära Pi:n
+  minskar ringningen ytterligare och är billig försäkring på en lång kabel.
 - Varje transaktion (CS låg → CS hög) börjar med en kommandobyte från mastern.
 - `spi_miso` är hög-Z när `spi_cs_n` är hög.
 

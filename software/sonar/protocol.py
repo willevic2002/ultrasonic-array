@@ -16,9 +16,9 @@ PING_TOGGLE = 0x08
 
 N_CHANNELS = 16
 FS = 3_125_000 / 32  # 97 656,25 Hz
-# Chirpstart -> index i inspelningen, uppmätt i fpga/sim/run_e2e.sh. Varierar 0,3-1,3
-# beroende på var i decimeringsperioden PINGen kommer (±0,9 mm).
-LATENCY_SAMPLES = 0.8
+# Chirpstart -> index i inspelningen, uppmätt i fpga/sim/run_e2e.sh. Konstant, eftersom
+# FPGA:n startar chirpen i fas med ett sampel.
+LATENCY_SAMPLES = 1.0
 
 
 class Status(NamedTuple):

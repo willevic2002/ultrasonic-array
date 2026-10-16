@@ -1,18 +1,19 @@
 -- spi_slave: byte-transport för SPI-läge 0 (CPOL=0, CPHA=0), MSB först.
 --
--- SCLK, CS och MOSI översamplas med systemklockan (2-vippors synkare + en
--- vippa för flankdetektering), så SCLK får vara högst 10 MHz (10 klockcykler
--- per period). Ingen egen klockdomän.
+-- SCLK, CS och MOSI översamplas med systemklockan (2-vippors synkare). En flank
+-- på SCLK räknas först när två sampel i rad (s2, s3) har den nya nivån, så en
+-- glitch på högst 10 ns (ringning på kabeln) ignoreras. SCLK högst 8 MHz.
+-- Ingen egen klockdomän.
 --
 -- Gränssnitt mot capture_spi: efter varje komplett byte kommer rx_strobe
 -- (en cykel) med rx_byte och rx_idx (0 = kommandobyten, räknar upp till 4 och
 -- stannar). capture_spi svarar med tx_load + tx_byte, och byten skiftas ut
 -- i nästa byte. Byte 0 får alltså alltid svaret 0x00.
 --
--- MISO-timing (varför det håller vid 10 MHz): nästa bit läggs ut på fallande
--- SCLK. Flanken syns i klockdomänen tidigast efter 2 vippor och utgångsvippan
--- uppdateras en cykel senare, dvs. högst 3 cykler = 30 ns efter flanken.
--- Stigande flank kommer 50 ns efter fallande (50 % duty), marginal >= 20 ns.
+-- MISO-timing (varför det håller vid 8 MHz): nästa bit läggs ut på fallande
+-- SCLK. Synkare och glitchfilter gör att utgångsvippan uppdateras högst
+-- 4 cykler = 40 ns efter flanken, plus ca 3-5 ns i utgångsbufferten.
+-- Stigande flank kommer 62,5 ns efter fallande (50 % duty), marginal ca 18 ns.
 -- Första biten i en byte läggs ut redan strax efter 8:e stigande flanken,
 -- med mer än en halv SCLK-period i marginal.
 --
@@ -42,6 +43,7 @@ end entity;
 
 architecture rtl of spi_slave is
   signal s1, s2, s3 : std_logic := '0';  -- SCLK, s3 = föregående s2
+  signal sf         : std_logic := '0';  -- filtrerad SCLK-nivå
   signal c1, c2     : std_logic := '1';  -- CS
   signal m1, m2     : std_logic := '0';  -- MOSI
   attribute ASYNC_REG : string;
@@ -59,13 +61,14 @@ begin
       c1 <= spi_cs_n; c2 <= c1;
       m1 <= spi_mosi; m2 <= m1;
       rx_strobe <= '0';
+      if s2 = s3 then sf <= s2; end if;
 
       if rst = '1' or c2 = '1' then
         bit_cnt <= 0;
         idx     <= 0;
         sh      <= (others => '0');
       else
-        if s3 = '0' and s2 = '1' then          -- stigande: MOSI samplas
+        if s2 = s3 and sf = '0' and s2 = '1' then     -- stigande: MOSI samplas
           rx_sh <= rx_sh(6 downto 0) & m2;
           if bit_cnt = 7 then
             bit_cnt   <= 0;
@@ -76,7 +79,7 @@ begin
           else
             bit_cnt <= bit_cnt + 1;
           end if;
-        elsif s3 = '1' and s2 = '0' then       -- fallande: nästa MISO-bit
+        elsif s2 = s3 and sf = '1' and s2 = '0' then  -- fallande: nästa MISO-bit
           if bit_cnt /= 0 then                 -- bit_cnt = 0: byten är nyladdad
             sh <= sh(6 downto 0) & '0';
           end if;
