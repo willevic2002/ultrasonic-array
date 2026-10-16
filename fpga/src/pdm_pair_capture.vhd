@@ -1,15 +1,15 @@
 -- pdm_pair_capture: läser en PDM-datalinje som delas av två mikrofoner.
 --
 -- Den ena mikrofonen driver linjen efter stigande flank, den andra efter
--- fallande flank. Vilken SELECT-nivå (GND/VDD) som ger vilken flank:
--- VERIFIERA mot databladet. Här heter kanalerna efter flanken de driver på:
+-- fallande flank. Enligt databladet (SPH0641LU4H-1 rev B) driver SELECT = VDD
+-- efter stigande flank och SELECT = GND efter fallande. Kanalerna heter efter flanken:
 --   bit_r: mikrofonen som driver efter stigande flank (läses strax före fallande)
 --   bit_f: mikrofonen som driver efter fallande flank (läses strax före stigande)
 --
 -- Datalinjen synkas med två vippor. Värdet som läses är därför 2-3
 -- systemcykler (20-30 ns vid 100 MHz) gammalt vid flanken. Mikrofonens
 -- data-valid-tid efter flanken måste vara kortare än halvperioden minus det
--- (160 ns - 30 ns vid 3,125 MHz). Testbänken antar 40 ns. VERIFIERA tDV.
+-- (160 ns - 30 ns vid 3,125 MHz). Databladet: tDD max 40 ns, som testbänken använder.
 --
 -- Första valid_f efter reset kommer före någon fallande flank och är skräp.
 --

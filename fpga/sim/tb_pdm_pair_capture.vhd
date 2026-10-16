@@ -9,8 +9,8 @@
 --   * mic_clk-perioden i start- och ultraljudsläge (640 ns resp. 320 ns)
 --   * att N_CHECK bitar per kanal läses in korrekt, över båda lägena
 --
--- Modellen är en förenkling (ingen hög-Z-övergång, fast tDV). VERIFIERA
--- tidsparametrarna mot databladet.
+-- Modellen är en förenkling (ingen hög-Z-övergång, fast tDV). T_DV = 40 ns är
+-- databladets max för tDD (SPH0641LU4H-1 rev B).
 
 library ieee;
 use ieee.std_logic_1164.all;
