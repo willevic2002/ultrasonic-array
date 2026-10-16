@@ -41,3 +41,19 @@ def load_mic_positions(path) -> np.ndarray:
         raise ValueError(f"hittar inga x/y-kolumner i {path}, kolumner: {names}") from None
     xy = np.column_stack([data[x_col], data[y_col]]).astype(float) / 1000.0
     return np.column_stack([xy, np.zeros(len(xy))])
+
+
+def load_channel_positions(path) -> np.ndarray:
+    """(16, 3) mikrofonpositioner [m] ordnade efter FPGA-kanal (docs/pipeline.md §1).
+
+    DATAk + SEL VDD -> kanal 2(k-1), GND -> 2(k-1)+1. Räknas ur data_net/SEL_pin.
+    """
+    data = np.genfromtxt(path, delimiter=",", names=True, dtype=None, encoding="utf-8")
+    pos = load_mic_positions(path)
+    chan = [2 * (int(str(d)[4:]) - 1) + (0 if str(s) == "VDD" else 1)
+            for d, s in zip(data["data_net"], data["SEL_pin"])]
+    if sorted(chan) != list(range(16)):
+        raise ValueError(f"kanalerna är inte 0..15 exakt en gång: {sorted(chan)}")
+    out = np.empty((16, 3))
+    out[chan] = pos
+    return out

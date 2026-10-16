@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import numpy as np
 import pytest
 
@@ -47,3 +49,13 @@ def test_load_mic_positions(tmp_path):
     pos = load_mic_positions(f)
     assert pos.shape == (2, 3)
     assert pos[0] == pytest.approx([0.010, -0.005, 0.0])
+
+
+def test_load_channel_positions():
+    from beamforming.io_utils import load_channel_positions
+
+    csv = Path(__file__).resolve().parents[2] / "hardware" / "mic_placement.csv"
+    pos, ref = load_channel_positions(csv), load_mic_positions(csv)
+    # U4 = DATA1 + VDD -> kanal 0, U1 = DATA1 + GND -> kanal 1
+    assert np.allclose(pos[0], ref[3]) and np.allclose(pos[1], ref[0])
+    assert len({tuple(p) for p in pos}) == 16

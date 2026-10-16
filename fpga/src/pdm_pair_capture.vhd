@@ -11,7 +11,9 @@
 -- data-valid-tid efter flanken måste vara kortare än halvperioden minus det
 -- (160 ns - 30 ns vid 3,125 MHz). Databladet: tDD max 40 ns, som testbänken använder.
 --
--- Första valid_f efter reset kommer före någon fallande flank och är skräp.
+-- valid_f undertrycks tills första sample_f har inträffat: före den finns ingen
+-- fallande flank att läsa efter, så första sample_r skulle ge skräp. Varje
+-- valid-puls är alltså en riktig bit.
 --
 -- STATUS: simulerad, OTESTAT i hårdvara.
 
@@ -33,7 +35,8 @@ entity pdm_pair_capture is
 end entity;
 
 architecture rtl of pdm_pair_capture is
-  signal sync : std_logic_vector(1 downto 0) := "00";
+  signal sync   : std_logic_vector(1 downto 0) := "00";
+  signal seen_f : std_logic := '0';  -- första sample_f har setts
   attribute ASYNC_REG : string;
   attribute ASYNC_REG of sync : signal is "TRUE";
 begin
@@ -47,12 +50,14 @@ begin
         sync  <= "00";
         bit_r <= '0';
         bit_f <= '0';
+        seen_f <= '0';
       else
         if sample_f = '1' then
           bit_r   <= sync(1);
           valid_r <= '1';
+          seen_f  <= '1';
         end if;
-        if sample_r = '1' then
+        if sample_r = '1' and seen_f = '1' then
           bit_f   <= sync(1);
           valid_f <= '1';
         end if;
