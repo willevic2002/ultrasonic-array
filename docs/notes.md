@@ -25,3 +25,15 @@ ger fel. `software/beamforming/das.py` fokuserar därför på punkter (riktning 
 3,125 MHz PDM / 16 i decimering ≈ 195 kS/s per kanal. 16 kanaler x 16 bit ≈ 50 Mbit/s.
 Det utesluter UART och gör SPI eller Ethernet till rimliga kandidater. Lägre
 decimerad samplingsfrekvens (t.ex. ~100 kS/s räcker för 40 kHz ± bandbredd) halverar det.
+
+## Länk FPGA → Pi: USB nu, SPI på slutkortet
+
+- **Utvecklingskortet (Boolean Board):** Pi:n (eller datorn) kopplas med kortets USB-kabel.
+  En brygga UART → SPI i FPGA:n (`fpga/selftest/`, under arbete) gör att samma
+  `SonarDevice` fungerar via `sonar.uart_bridge.UartSpi`. Inga bygelkablar.
+- **Slutkortet:** FPGA-chippet löds på eget kort, och SPI går som kopparbanor direkt till
+  Pi:ns GPIO (kontakt eller HAT). Korta banor ger inga timingproblem. SPI-koden är klar
+  och simulerad (`capture_spi`, `spi_slave`).
+- `xc7s50csga324` är BGA (324 kulor, 0,8 mm): kräver 4-6 lager och ugnslödning eller
+  montering hos fabriken, plus matningar (1,0/1,8/3,3 V), konfigurationsflash och oscillator.
+  Alternativ: färdig FPGA-modul, eller en mindre FPGA (designen använder ca 8 % av xc7s50).
