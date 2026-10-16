@@ -75,12 +75,17 @@ visar om det räcker. Annars: CIC ÷16 + FIR ÷2.
 - Vid PING: `chirp_start` samma cykel, sedan skrivs de `N_SAMPLES` nästa utsamplen till BRAM.
   Adress = `sampel * 16 + kanal`, 16 bitar per ord.
 - Fördröjningen från chirpstart till sampel 0 (plus CIC:ens gruppfördröjning) är konstant.
-  Den mäts i simuleringen av hela kedjan och skrivs in här: **`LATENCY_SAMPLES = (mäts)`**.
+  Den mäts i simuleringen av hela kedjan (`fpga/sim/run_e2e.sh`): 0,3-1,3 sampel beroende på
+  var i decimeringsperioden PINGen kommer. **`LATENCY_SAMPLES = 0.8`** (±0,9 mm i avstånd),
+  i `software/sonar/protocol.py`.
 
 ## 6. SPI-protokoll (Pi är master)
 
-- Läge 0 (CPOL = 0, CPHA = 0), MSB först, `spi_cs_n` aktiv låg, **SCLK högst 10 MHz**
-  (FPGA:n översamplar SCLK med 100 MHz).
+- Läge 0 (CPOL = 0, CPHA = 0), MSB först, `spi_cs_n` aktiv låg, **SCLK högst 8 MHz**
+  (FPGA:n översamplar SCLK med 100 MHz; MISO kommer upp till ca 40 ns efter fallande flank,
+  inklusive utgångsbufferten). Simuleringen kör 10 MHz. Börja på 1-4 MHz vid första testet.
+- Sätt ett serieresistor på 33-100 Ω i SCLK nära Pi:n. FPGA:n har inget glitchfilter, så
+  ringningar på en lång kabel kan räknas som en extra flank och förskjuta alla bitar.
 - Varje transaktion (CS låg → CS hög) börjar med en kommandobyte från mastern.
 - `spi_miso` är hög-Z när `spi_cs_n` är hög.
 
@@ -95,7 +100,7 @@ Statusbyte:
 | Bit | Namn | Betydelse |
 |---|---|---|
 | 7-4 | ID | Alltid `0xA`. Fel värde = fel koppling. |
-| 3 | – | 0 |
+| 3 | PING_TOGGLE | Växlar vid varje godkänd PING. Pi:n jämför före och efter, så att en förlorad PING inte ger förra inspelningen igen. |
 | 2 | DATA_VALID | En inspelning är klar och ligger i minnet (nollas vid nästa PING) |
 | 1 | CAPTURING | Spelar in |
 | 0 | READY | Ultraljudsläge, minst `SETTLE_CYCLES` sedan bytet, och spelar inte in |

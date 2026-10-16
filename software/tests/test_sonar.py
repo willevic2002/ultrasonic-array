@@ -14,8 +14,8 @@ def rand_data(n, seed=1):
 
 
 def test_status_parse():
-    assert p.parse_status(0xA5) == (True, False, True)
-    assert p.parse_status(0xA2) == (False, True, False)
+    assert p.parse_status(0xA5) == (True, False, True, False)
+    assert p.parse_status(0xAA) == (False, True, False, True)
     with pytest.raises(ValueError):
         p.parse_status(0x05)
     with pytest.raises(ValueError):
@@ -76,3 +76,14 @@ def test_echo_range():
     x[:150] += 20  # direktkoppling i närzonen
     x[k : k + len(ref)] += ref
     assert echo_range(pulse_compress(x, FS)[0], FS) == pytest.approx(1.0, abs=0.02)
+
+
+def test_lost_ping_raises():
+    from sonar.device import SonarDevice
+    from sonar.fake import FakeFpga
+
+    fpga = FakeFpga(np.zeros((16, 8), dtype=np.int16))
+    real = fpga.xfer2
+    fpga.xfer2 = lambda tx: [0] * len(tx) if list(tx)[:1] == [0x02] else real(tx)  # PING tappas
+    with pytest.raises(IOError, match="PING"):
+        SonarDevice(fpga).capture(n_samples=8)

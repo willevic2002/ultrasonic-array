@@ -70,6 +70,7 @@ architecture rtl of capture_spi is
 
   signal settle_cnt : natural range 0 to SETTLE_CYCLES := 0;
   signal cap_active, data_valid, busy : std_logic := '0';
+  signal ping_toggle : std_logic := '0';  -- växlar vid varje godkänd PING, så Pi:n ser om den kom fram
   signal ready  : std_logic;
   signal sidx   : natural range 0 to N_SAMPLES - 1 := 0;
   signal ch     : natural range 0 to N_CH - 1 := 0;
@@ -146,9 +147,10 @@ begin
         if rx_idx = 0 then
           cmd <= rx_byte;
           if rx_byte = CMD_STATUS then
-            tx_byte <= x"A" & '0' & data_valid & cap_active & ready;
+            tx_byte <= x"A" & ping_toggle & data_valid & cap_active & ready;
           elsif rx_byte = CMD_PING and ready = '1' then
             chirp_start <= '1';
+            ping_toggle <= not ping_toggle;
             cap_active  <= '1';
             data_valid  <= '0';
             busy        <= '0';
@@ -174,7 +176,7 @@ begin
 
       if rst = '1' then
         settle_cnt <= 0;
-        cap_active <= '0'; data_valid <= '0'; busy <= '0';
+        cap_active <= '0'; data_valid <= '0'; busy <= '0'; ping_toggle <= '0';
         sidx <= 0; wr_en <= '0'; tx_load <= '0';
       end if;
     end if;

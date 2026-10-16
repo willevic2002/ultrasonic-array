@@ -12,22 +12,27 @@ STATUS_ID = 0xA
 READY = 0x01
 CAPTURING = 0x02
 DATA_VALID = 0x04
+PING_TOGGLE = 0x08
 
 N_CHANNELS = 16
 FS = 3_125_000 / 32  # 97 656,25 Hz
+# Chirpstart -> index i inspelningen, uppmätt i fpga/sim/run_e2e.sh. Varierar 0,3-1,3
+# beroende på var i decimeringsperioden PINGen kommer (±0,9 mm).
+LATENCY_SAMPLES = 0.8
 
 
 class Status(NamedTuple):
     ready: bool
     capturing: bool
     data_valid: bool
+    ping_toggle: bool
 
 
 def parse_status(b: int) -> Status:
     """Tolkar statusbyten. ValueError om ID-nibblen inte är 0xA (fel koppling)."""
     if b >> 4 != STATUS_ID:
         raise ValueError(f"fel ID i statusbyte: 0x{b:02X} (väntade 0xA_), kontrollera kopplingen")
-    return Status(bool(b & READY), bool(b & CAPTURING), bool(b & DATA_VALID))
+    return Status(bool(b & READY), bool(b & CAPTURING), bool(b & DATA_VALID), bool(b & PING_TOGGLE))
 
 
 def read_request(addr: int, n_words: int) -> list[int]:

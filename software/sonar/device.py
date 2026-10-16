@@ -47,7 +47,11 @@ class SonarDevice:
 
     def capture(self, timeout: float = 1.0, n_samples: int = 2048) -> np.ndarray:
         self.wait_ready(timeout)
+        before = self.status().ping_toggle
         self.ping()
+        # Utan kontrollen skulle en förlorad PING ge förra inspelningen igen.
+        if self.status().ping_toggle == before:
+            raise IOError("PING kom inte fram (ping_toggle ändrades inte)")
         self._wait(lambda s: s.data_valid, "DATA_VALID", timeout)
         return self.read_capture(n_samples)
 

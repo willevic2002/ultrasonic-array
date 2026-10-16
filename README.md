@@ -32,7 +32,8 @@ runt en robot. Genereras av `tools/draw_sketch.py` från `hardware/mic_placement
   med 10-12 V. Sitter i mitten av arrayen.
 - **FPGA:** Real Digital Boolean Board (XC7S50, `xc7s50csga324-1`), VHDL i Vivado.
   Spartan-7 har ingen DFSDM-hårdvara, så PDM läses och decimeras i logiken.
-- **Raspberry Pi:** tar emot decimerad data (länk inte bestämd än) och kör beamforming.
+- **Raspberry Pi:** SPI-master. Startar en ping, läser inspelningen (16 kanaler x 2048 sampel)
+  och kör matchat filter och beamforming. Se [docs/pipeline.md](docs/pipeline.md).
 
 ## Status
 
@@ -43,11 +44,11 @@ runt en robot. Genereras av `tools/draw_sketch.py` från `hardware/mic_placement
 | Steg 1: färdig HC-SR04-modul avläst med STM32 | ✅ Fungerar (utanför detta repo) |
 | PDM-mikrofonerna (SPH0641LU4H-1) | ❌ Inte testade i hårdvara än |
 | Steg 3: eget kort, 16 mikrofoner | 🚧 Utkast. Placering klar och reproducerbar från skript, designkontroller (DRC + egna) går igenom, footprints är platshållare, inga ledningar, inget jordplan, ingen sändare |
-| `fpga/`: klockgenerator + PDM-inläsning för ett mikrofonpar | 🧪 Simulerad i xsim, **otestad i hårdvara** |
-| `fpga/`: CIC-decimering, 8 datalinjer, länk till Pi | ❌ Inte påbörjat |
-| `fpga/constraints/`: pinnar | ❌ Bara mall, pinnar inte valda |
+| `fpga/`: hela kedjan (klocka, 16 kanaler, CIC, chirp, inspelning, SPI till Pi) | 🧪 Simulerad i xsim, bitexakt mot Python-modellen, syntetiserad med timing uppfylld. **Otestad i hårdvara** |
+| `fpga/constraints/`: pinnar | 🧪 Valda på PMOD JA/JB/JC, utlästa ur schemat, ska verifieras |
 | `software/`: delay-and-sum offline | 🧪 Testad på syntetisk data, **aldrig körd på riktig mätdata** |
-| `software/`: chirp + matchat filter, ROS 2 | ❌ Inte påbörjat |
+| `software/`: SPI-klient för Pi:n, matchat filter, Python-modell av PDM/CIC | 🧪 Testad mot en falsk FPGA och i simuleringen av hela kedjan |
+| `software/`: ROS 2 | ❌ Inte påbörjat |
 
 Alla tekniska fakta om mikrofonen och Boolean Board (pinnar, klockintervall,
 tidsparametrar) ska verifieras mot datablad. Se [docs/datasheets.md](docs/datasheets.md).

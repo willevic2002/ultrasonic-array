@@ -44,6 +44,8 @@ architecture rtl of spi_slave is
   signal s1, s2, s3 : std_logic := '0';  -- SCLK, s3 = föregående s2
   signal c1, c2     : std_logic := '1';  -- CS
   signal m1, m2     : std_logic := '0';  -- MOSI
+  attribute ASYNC_REG : string;
+  attribute ASYNC_REG of s1, s2, c1, c2, m1, m2 : signal is "TRUE";
   signal rx_sh, sh  : std_logic_vector(7 downto 0) := (others => '0');
   signal bit_cnt    : natural range 0 to 7 := 0;
   signal idx        : natural range 0 to 4 := 0;

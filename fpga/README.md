@@ -2,16 +2,34 @@
 
 VHDL för Real Digital Boolean Board (Spartan-7, `xc7s50csga324-1`), Vivado 2026.1.
 
+Hela kedjan och SPI-protokollet beskrivs i [docs/pipeline.md](../docs/pipeline.md).
+
 | Fil | Vad | Status |
 |---|---|---|
+| `src/mic_array_top.vhd` | Toppnivå: klocka, 8 linjer, 16 CIC, inspelning/SPI, chirp | Simulerad, syntetiserad |
 | `src/pdm_clock_gen.vhd` | Mikrofonklocka från 100 MHz: 1,5625 MHz vid start, sen 3,125 MHz | Simulerad |
 | `src/pdm_pair_capture.vhd` | Läser en DATA-linje som delas av två mikrofoner | Simulerad |
-| `sim/tb_pdm_pair_capture.vhd` | Testbänk med modell av två mikrofoner | – |
+| `src/cic_decimator.vhd` | CIC N=4, R=32: PDM -> int16 i 97,66 kHz | Simulerad, bitexakt mot Python |
+| `src/chirp_gen.vhd` | Chirp 38 -> 42 kHz, 1 ms, differentiellt till drivaren | Simulerad |
+| `src/capture_spi.vhd`, `src/spi_slave.vhd` | Inspelning till BRAM, SPI-kommandon STATUS/PING/READ | Simulerad |
 | `src/mic_array_pkg.vhd` | Gemensamma typer (`sample_array`) | – |
+| `sim/tb_*.vhd` | Självkontrollerande testbänkar per modul | – |
+| `sim/e2e_mic_array_top.vhd`, `sim/e2e.py`, `sim/run_e2e.sh` | Hela kedjan: eko i Python -> toppnivån via SPI -> kontroll | – |
 | `sim/tb_pdm_pair_capture.wcfg` | Vågformsvy: mic_clk, sample/valid/bit per kanal, räknare | – |
-| `constraints/boolean_mic_array.xdc` | Pinnmall, **inga pinnar valda än** | Mall |
+| `constraints/boolean_mic_array.xdc` | Pinnar på PMOD JA/JB/JC, **verifiera mot manualen** | Utläst ur schemat |
+| `tools/build.sh` | Syntes, place & route, bitström. Exit 0 bara om timing uppfylls | – |
 
 Inget av detta är testat i hårdvara.
+
+## Hela kedjan och bygget
+
+```bash
+PYTHON=<python med numpy> fpga/sim/run_e2e.sh   # eko -> FPGA -> SPI -> bitexakt + avstånd/riktning
+fpga/tools/build.sh                             # bitström i fpga/build/, rapporter där också
+```
+
+Senaste bygget: timing uppfylls (WNS 0,996 ns vid 100 MHz). 2 927 LUT (9 %), 3 901 vippor (6 %),
+16 BRAM36 (21 %), 0 DSP.
 
 ## Simulera
 

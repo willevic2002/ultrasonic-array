@@ -27,7 +27,7 @@ set_property -dict { PACKAGE_PIN B17 IOSTANDARD LVCMOS33 } [get_ports tx_n] ;# J
 ## JC: SPI till Raspberry Pi (Pi är master)
 set_property -dict { PACKAGE_PIN T6 IOSTANDARD LVCMOS33 } [get_ports spi_sclk] ;# JC1_P
 set_property -dict { PACKAGE_PIN T5 IOSTANDARD LVCMOS33 } [get_ports spi_mosi] ;# JC1_N
-set_property -dict { PACKAGE_PIN R5 IOSTANDARD LVCMOS33 } [get_ports spi_miso] ;# JC2_P
+set_property -dict { PACKAGE_PIN R5 IOSTANDARD LVCMOS33 SLEW FAST } [get_ports spi_miso] ;# JC2_P
 set_property -dict { PACKAGE_PIN T4 IOSTANDARD LVCMOS33 PULLUP TRUE } [get_ports spi_cs_n] ;# JC2_N, pull-up: inget händer utan Pi
 
 ## Alla in- och utgångar är asynkrona mot sys_clk (synkas med två vippor eller

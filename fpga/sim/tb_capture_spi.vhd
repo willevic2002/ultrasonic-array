@@ -152,8 +152,10 @@ begin
       variable d : std_logic_vector(7 downto 0);
     begin
       cs_begin; xfer(x"01", d); xfer(x"00", s); cs_end;
-      assert s(7 downto 4) = x"A" and s(3) = '0'
-        report "FAIL: statusbyte ID/bit3 fel" severity failure;
+      -- bit 3 (PING_TOGGLE) växlar vid varje godkänd PING, alltså en gång per chirp_start.
+      assert s(7 downto 4) = x"A" and (s(3) = '1') = (n_chirp mod 2 = 1)
+        report "FAIL: statusbyte ID/PING_TOGGLE fel" severity failure;
+      s(3) := '0';  -- kontrollerad ovan, så att resten kan jämföra hela byten
     end procedure;
 
     procedure ping is

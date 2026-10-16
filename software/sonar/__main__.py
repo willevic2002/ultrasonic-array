@@ -12,7 +12,7 @@ import numpy as np
 from .device import SonarDevice, open_spidev
 from .fake import FakeFpga
 from .matched import chirp_reference, echo_range, pulse_compress
-from .protocol import FS
+from .protocol import FS, LATENCY_SAMPLES
 
 
 def fake_device(n_samples: int, distance: float = 1.0) -> SonarDevice:
@@ -38,7 +38,7 @@ def main() -> None:
     for i in range(a.pings):
         sig = dev.capture(n_samples=a.samples)
         caps.append(sig)
-        r = echo_range(pulse_compress(sig, FS).sum(axis=0), FS)
+        r = echo_range(pulse_compress(sig, FS).sum(axis=0), FS, latency_samples=LATENCY_SAMPLES)
         print(f"ping {i}: starkaste eko på {r:.3f} m")
     # signals = sista pingen (mic, sampel) så att load_raw fungerar; pings = alla (ping, mic, sampel)
     np.savez(a.out, signals=caps[-1], pings=np.stack(caps), fs=FS)

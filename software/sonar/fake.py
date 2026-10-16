@@ -13,6 +13,7 @@ class FakeFpga:
         self.ready = ready
         self.capturing = False
         self.data_valid = False
+        self.ping_toggle = False
         self.mem = np.zeros(1 << 16, dtype=np.int16)
         if data is not None:
             self.set_data(data)
@@ -31,11 +32,12 @@ class FakeFpga:
         if cmd == p.CMD_STATUS:
             if len(tx) > 1:
                 rx[1] = (p.STATUS_ID << 4) | (p.READY * self.ready) | (p.CAPTURING * self.capturing) | (
-                    p.DATA_VALID * self.data_valid
+                    p.DATA_VALID * self.data_valid) | (p.PING_TOGGLE * self.ping_toggle
                 )
         elif cmd == p.CMD_PING:
             if self.ready and not self.capturing:
                 self.data_valid = True  # inspelningen är klar direkt
+                self.ping_toggle = not self.ping_toggle
         elif cmd == p.CMD_READ and len(tx) >= 4:
             addr = (tx[1] << 8) | tx[2]
             for i in range((len(tx) - 4) // 2):
