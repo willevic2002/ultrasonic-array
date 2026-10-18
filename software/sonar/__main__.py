@@ -3,15 +3,18 @@
 Exempel (från software/):
     python -m sonar --fake --pings 1 --out /tmp/x.npz
     python -m sonar --pings 5 --out ping.npz        # på Pi:n
+    python -m sonar --fake --out /tmp/x.npz --mics ../hardware/mic_placement.csv   # + riktning
 """
 
 import argparse
 
 import numpy as np
 
+from beamforming.io_utils import load_channel_positions
+
 from .device import SonarDevice, open_spidev
 from .fake import FakeFpga
-from .matched import chirp_reference, echo_range, pulse_compress
+from .matched import chirp_reference, echo_range, locate, pulse_compress
 from .protocol import FS, LATENCY_SAMPLES
 
 
@@ -31,15 +34,22 @@ def main() -> None:
     ap.add_argument("--fake", action="store_true", help="syntetisk FPGA, ingen hårdvara")
     ap.add_argument("--speed", type=int, default=4_000_000, help="SPI-klocka [Hz], högst 8 MHz")
     ap.add_argument("--samples", type=int, default=2048)
+    ap.add_argument("--mics", help="mic_placement.csv: skriv även ut riktning (delay-and-sum)")
     a = ap.parse_args()
+
+    mic_pos = load_channel_positions(a.mics) if a.mics else None
 
     dev = fake_device(a.samples) if a.fake else open_spidev(speed_hz=a.speed)
     caps = []
     for i in range(a.pings):
         sig = dev.capture(n_samples=a.samples)
         caps.append(sig)
-        r = echo_range(pulse_compress(sig, FS).sum(axis=0), FS, latency_samples=LATENCY_SAMPLES)
-        print(f"ping {i}: starkaste eko på {r:.3f} m")
+        if mic_pos is None:
+            r = echo_range(pulse_compress(sig, FS).sum(axis=0), FS, latency_samples=LATENCY_SAMPLES)
+            print(f"ping {i}: starkaste eko på {r:.3f} m")
+        else:
+            r, az, el = locate(sig, FS, mic_pos, latency_samples=LATENCY_SAMPLES)
+            print(f"ping {i}: starkaste eko på {r:.3f} m, azimut {az:.0f}°, elevation {el:.0f}°")
     # signals = sista pingen (mic, sampel) så att load_raw fungerar; pings = alla (ping, mic, sampel)
     np.savez(a.out, signals=caps[-1], pings=np.stack(caps), fs=FS)
     print(f"sparade {a.out}")

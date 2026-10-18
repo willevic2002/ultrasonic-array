@@ -4,7 +4,7 @@ import pytest
 from sonar import protocol as p
 from sonar.device import SonarDevice
 from sonar.fake import FakeFpga
-from sonar.matched import chirp_reference, echo_range, pulse_compress
+from sonar.matched import chirp_reference, echo_range, locate, pulse_compress
 
 FS = p.FS
 
@@ -87,3 +87,22 @@ def test_lost_ping_raises():
     fpga.xfer2 = lambda tx: [0] * len(tx) if list(tx)[:1] == [0x02] else real(tx)  # PING tappas
     with pytest.raises(IOError, match="PING"):
         SonarDevice(fpga).capture(n_samples=8)
+
+
+@pytest.mark.parametrize("az_true,el_true,r_true", [(20, -10, 1.2), (-36, 24, 0.6)])
+def test_locate_range_and_direction(az_true, el_true, r_true):
+    from pathlib import Path
+
+    from beamforming.das import steering_points
+    from beamforming.io_utils import load_channel_positions
+
+    mics = load_channel_positions(Path(__file__).resolve().parents[2] / "hardware" / "mic_placement.csv")
+    src = steering_points([az_true], [el_true], r_true)[0]
+    tau = (np.linalg.norm(src) + np.linalg.norm(mics - src, axis=1)) / 343.0  # sändare i origo
+    t = np.arange(2048) / FS - tau[:, None]
+    # Chirpen beräknas analytiskt med fraktionell fördröjning per mikrofon.
+    echo = np.where((t >= 0) & (t < 1e-3), np.sin(2 * np.pi * (38e3 * t + 2e6 * t**2)), 0.0)
+    x = echo + np.random.default_rng(0).normal(0, 0.3, echo.shape)
+    r, az, el = locate(x, FS, mics)
+    assert r == pytest.approx(r_true, abs=0.02)
+    assert abs(az - az_true) <= 4 and abs(el - el_true) <= 4

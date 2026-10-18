@@ -81,6 +81,7 @@ python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 pytest
 python -m beamforming data.npz --mics ../hardware/mic_placement.csv --range 1.0
+python -m sonar --fake --out /tmp/x.npz --mics ../hardware/mic_placement.csv  # avstånd + riktning
 ```
 
 ### Kortet
