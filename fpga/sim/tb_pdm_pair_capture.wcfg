@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wave_config>
+   <wave_state>
+   </wave_state>
+   <db_ref_list>
+      <db_ref path="tb.wdb" id="1">
+         <top_modules>
+            <top_module name="tb_pdm_pair_capture" />
+         </top_modules>
+      </db_ref>
+   </db_ref_list>
+   <zoom_setting>
+   </zoom_setting>
+   <column_width_setting>
+   </column_width_setting>
+   <WVObjectSize size="16" />
+   <wvobject fp_name="divider1" type="divider">
+      <obj_property name="label">Klocka</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/tb_pdm_pair_capture/clk">
+      <obj_property name="ElementShortName">clk</obj_property>
+      <obj_property name="ObjectShortName">clk</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/tb_pdm_pair_capture/rst">
+      <obj_property name="ElementShortName">rst</obj_property>
+      <obj_property name="ObjectShortName">rst</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/tb_pdm_pair_capture/mic_clk">
+      <obj_property name="ElementShortName">mic_clk</obj_property>
+      <obj_property name="ObjectShortName">mic_clk</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/tb_pdm_pair_capture/ultrasonic">
+      <obj_property name="ElementShortName">ultrasonic</obj_property>
+      <obj_property name="ObjectShortName">ultrasonic</obj_property>
+   </wvobject>
+   <wvobject fp_name="divider6" type="divider">
+      <obj_property name="label">Data</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/tb_pdm_pair_capture/pdm_data">
+      <obj_property name="ElementShortName">pdm_data</obj_property>
+      <obj_property name="ObjectShortName">pdm_data</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/tb_pdm_pair_capture/sample_r">
+      <obj_property name="ElementShortName">sample_r</obj_property>
+      <obj_property name="ObjectShortName">sample_r</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/tb_pdm_pair_capture/bit_r">
+      <obj_property name="ElementShortName">bit_r</obj_property>
+      <obj_property name="ObjectShortName">bit_r</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/tb_pdm_pair_capture/valid_r">
+      <obj_property name="ElementShortName">valid_r</obj_property>
+      <obj_property name="ObjectShortName">valid_r</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/tb_pdm_pair_capture/sample_f">
+      <obj_property name="ElementShortName">sample_f</obj_property>
+      <obj_property name="ObjectShortName">sample_f</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/tb_pdm_pair_capture/bit_f">
+      <obj_property name="ElementShortName">bit_f</obj_property>
+      <obj_property name="ObjectShortName">bit_f</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/tb_pdm_pair_capture/valid_f">
+      <obj_property name="ElementShortName">valid_f</obj_property>
+      <obj_property name="ObjectShortName">valid_f</obj_property>
+   </wvobject>
+   <wvobject fp_name="divider14" type="divider">
+      <obj_property name="label">Räknare</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+   </wvobject>
+   <wvobject type="other" fp_name="/tb_pdm_pair_capture/n_r">
+      <obj_property name="ElementShortName">n_r</obj_property>
+      <obj_property name="ObjectShortName">n_r</obj_property>
+      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+   </wvobject>
+   <wvobject type="other" fp_name="/tb_pdm_pair_capture/n_f">
+      <obj_property name="ElementShortName">n_f</obj_property>
+      <obj_property name="ObjectShortName">n_f</obj_property>
+      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+   </wvobject>
+</wave_config>

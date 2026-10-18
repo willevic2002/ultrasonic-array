@@ -17,3 +17,7 @@
 - Skiss av enheten (`docs/images/device_sketch.svg`, genererad av `tools/draw_sketch.py`).
 - TODO-listan flyttad till GitHub Issues (#1-#14).
 - `software/`: delay-and-sum offline med fokus på punkter (närfält), testad på syntetisk data.
+
+### 2026-10-18
+- `software/`: `sonar.matched.locate` ger avstånd (matchat filter) och riktning (delay-and-sum
+  fokuserat på ekots avstånd). `python -m sonar --mics …` skriver ut båda (#12).

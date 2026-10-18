@@ -9,8 +9,8 @@
 --   * mic_clk-perioden i start- och ultraljudsläge (640 ns resp. 320 ns)
 --   * att N_CHECK bitar per kanal läses in korrekt, över båda lägena
 --
--- Modellen är en förenkling (ingen hög-Z-övergång, fast tDV). VERIFIERA
--- tidsparametrarna mot databladet.
+-- Modellen är en förenkling (ingen hög-Z-övergång, fast tDV). T_DV = 40 ns är
+-- databladets max för tDD (SPH0641LU4H-1 rev B).
 
 library ieee;
 use ieee.std_logic_1164.all;
@@ -68,11 +68,8 @@ begin
         n_r <= n_r + 1;
       end if;
       if valid_f = '1' then
-        -- index 0 läses före första fallande flanken och är skräp
-        if n_f > 0 then
-          assert bit_f = PAT_F((n_f - 1) mod 64)
-            report "bit_f fel vid index " & integer'image(n_f - 1) severity failure;
-        end if;
+        assert bit_f = PAT_F(n_f mod 64)
+          report "bit_f fel vid index " & integer'image(n_f) severity failure;
         n_f <= n_f + 1;
       end if;
     end if;
@@ -94,8 +91,8 @@ begin
     assert now - t0 = 320 ns
       report "fel period i ultraljudsläge: " & time'image(now - t0) severity failure;
 
-    wait until n_r >= N_CHECK and n_f > N_CHECK;
-    report "PASS: " & integer'image(n_r) & " + " & integer'image(n_f - 1)
+    wait until n_r >= N_CHECK and n_f >= N_CHECK;
+    report "PASS: " & integer'image(n_r) & " + " & integer'image(n_f)
          & " bitar korrekt inlästa" severity note;
     finish;
   end process;

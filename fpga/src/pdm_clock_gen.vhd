@@ -2,8 +2,9 @@
 --
 -- Startar i en långsammare klocka (standardläge) och går över till
 -- ultraljudsläge efter STARTUP_CYCLES. Mikrofonen ska inte starta direkt i
--- ultraljudsläge. Exakta frekvensintervall och starttid: VERIFIERA mot
--- databladet för SPH0641LU4H-1.
+-- ultraljudsläge. Enligt databladet för SPH0641LU4H-1 (rev B) är wake-up-tiden
+-- max 15 ms, och efter lägesbytet kan data vara ogiltig i upp till 10 ms
+-- (Mode-Change Time). Mottagaren ska kasta de första 10 ms efter ultrasonic = '1'.
 --
 -- Med 100 MHz systemklocka och heltalsdelning är 3,072 MHz inte exakt
 -- möjligt (100/3,072 = 32,55). Default ger 3,125 MHz, som ligger inom
@@ -23,7 +24,7 @@ entity pdm_clock_gen is
   generic (
     HALF_PERIOD_START : positive := 32;        -- 100 MHz / (2*32) = 1,5625 MHz (standardläge)
     HALF_PERIOD_RUN   : positive := 16;        -- 100 MHz / (2*16) = 3,125 MHz (ultraljudsläge)
-    STARTUP_CYCLES    : natural  := 1_000_000  -- 10 ms vid 100 MHz
+    STARTUP_CYCLES    : natural  := 2_000_000  -- 20 ms vid 100 MHz (wake-up max 15 ms)
   );
   port (
     clk        : in  std_logic;

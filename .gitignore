@@ -24,6 +24,8 @@ xsim.dir/
 webtalk*
 vivado*.backup.*
 fpga/sim/build/
+fpga/build/
+clockInfo.txt
 
 # GHDL
 *.cf
