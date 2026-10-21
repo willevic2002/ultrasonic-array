@@ -1,8 +1,8 @@
 # Genererar hardware/mic_placement.csv: 16 mikrofoner i en Vogel-spiral.
-# r_i = 8,5 * sqrt(i + 1) mm, vinkel_i = i * gyllene vinkeln. Ger min. avstånd ca 13,6 mm,
-# innersta mikrofonen på 8,5 mm (plats för sändaren i mitten) och ytterradie 34 mm,
-# vilket ryms på det 84 x 84 mm stora kortet.
-# Första utkastet hade sqrt(i + 0,5): då hamnade U1 under sändaren.
+# r_i = 8,5 * sqrt(i + 1,5) mm, vinkel_i = i * gyllene vinkeln. Ger min. avstånd ca 13,9 mm,
+# innersta mikrofonen på 10,4 mm (plats för sändaren CUSA-T75, Ø12,5 mm, i mitten) och
+# ytterradie 34,5 mm, vilket ryms på det 84 x 84 mm stora kortet.
+# Första utkastet hade sqrt(i + 0,5): då hamnade U1 under sändaren. sqrt(i + 1) räckte för MA40S4S (Ø10 mm).
 #
 # Varje DATA-linje delas av två mikrofoner: den första i paret får SEL mot GND,
 # den andra SEL mot VDD. Parningen nedan är tagen från första utkastet av kortet
@@ -14,7 +14,7 @@ from pathlib import Path
 
 N = 16
 SCALE_MM = 8.5
-RADIUS_OFFSET = 1.0
+RADIUS_OFFSET = 1.5
 GOLDEN_ANGLE = math.radians(137.508)  # avrundad gyllene vinkel
 MIN_SPACING_MM = 13.0
 

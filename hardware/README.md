@@ -19,8 +19,8 @@ python3 hardware/scripts/make_kicad_pcb.py # -> hardware/kicad/mic_array.kicad_p
 ```
 
 Skripten hittar sina filer relativt sig själva och kan köras från vilken mapp som helst.
-`place_mics.py` placerar mikrofonerna i en Vogel-spiral: r = 8,5·√(i+1) mm,
-vinkel = i·137,508°. Min. avstånd 13,62 mm, innersta mikrofonen 8,5 mm från mitten.
+`place_mics.py` placerar mikrofonerna i en Vogel-spiral: r = 8,5·√(i+1,5) mm,
+vinkel = i·137,508°. Min. avstånd 13,95 mm, innersta mikrofonen 10,4 mm från mitten.
 Första utkastet hade √(i+0,5), men då hamnade U1 under sändaren.
 
 Mikrofonerna använder KiCads footprint `Sensor_Audio:Knowles_LGA-5_3.5x2.65mm`
@@ -29,8 +29,8 @@ Porten sitter 0,77 mm från kapselns mitt. Footprinten placeras så att **porten
 hamnar på positionen i `mic_placement.csv`, så csv:n anger de akustiska positionerna.
 
 `make_kicad_pcb.py` lägger också in courtyards och en keepout-zon (`TX_KEEPOUT`,
-radie 6 mm) i mitten där sändaren ska sitta. Radien förutsätter MA40S4S (Ø10 mm)
-och ska ändras om en annan sändare väljs (#4).
+radie 7,25 mm) i mitten där sändaren ska sitta. Radien förutsätter Same Sky
+CUSA-T75-18-2400-TH (Ø12,5 mm) och ska ändras om en annan sändare väljs (#4).
 
 ## Testa designen
 
@@ -52,7 +52,7 @@ dra ledningar i KiCad ska du sluta köra skriptet (eller ändra det att skriva t
 
 `mic_array.kicad_pcb` är ett **utkast** genererat av `make_kicad_pcb.py`:
 
-- 16 mikrofoner i Vogel-spiral, min. avstånd 13,6 mm, kort 84 x 84 mm
+- 16 mikrofoner i Vogel-spiral, min. avstånd 13,9 mm, kort 84 x 84 mm
 - Courtyards och keepout för sändaren i mitten
 - Riktig mikrofon-footprint med porthål
 - Inga ledningar, inget jordplan, ingen sändare/drivare

@@ -6,7 +6,7 @@ import csv, math, uuid
 from pathlib import Path
 
 HW = Path(__file__).resolve().parent.parent   # hardware/
-TX_KEEPOUT_R = 6.0     # sändaren i mitten: MA40S4S Ø10 mm + 1 mm luft. Ändra vid annan sändare (#4)
+TX_KEEPOUT_R = 7.25    # sändaren i mitten: Same Sky CUSA-T75-18-2400-TH Ø12,5 mm + 1 mm luft (#4)
 PORT_DY = 0.77         # ljudportens läge relativt kapselns mitt (Knowles_LGA-5_3.5x2.65mm)
 
 u = lambda: str(uuid.uuid4())

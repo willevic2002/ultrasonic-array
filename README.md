@@ -28,7 +28,7 @@ runt en robot. Genereras av `tools/draw_sketch.py` från `hardware/mic_placement
 
 - **Mikrofoner:** Knowles SPH0641LU4H-1, PDM med ultraljudsläge. Två mikrofoner delar
   en DATA-linje (SELECT väljer klockflank). 16 mikrofoner blir 8 DATA-linjer + 1 delad CLK.
-- **Sändare:** Murata MA40S4S (not for new designs, ersättare ska väljas) och drivare
+- **Sändare:** Same Sky CUSA-T75-18-2400-TH (Ø12,5 mm, ersätter Murata MA40S4S som är not for new designs) och drivare
   med 10-12 V. Sitter i mitten av arrayen.
 - **FPGA:** Real Digital Boolean Board (XC7S50, `xc7s50csga324-1`), VHDL i Vivado.
   Spartan-7 har ingen DFSDM-hårdvara, så PDM läses och decimeras i logiken.

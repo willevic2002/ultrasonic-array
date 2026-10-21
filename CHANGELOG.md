@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+### 2026-10-21
+- `hardware/`: sändaren byts från Murata MA40S4S (not for new designs) till Same Sky
+  CUSA-T75-18-2400-TH (Ø12,5 mm). Keepout-radien 6 -> 7,25 mm och spiralen flyttad till
+  r = 8,5·√(i+1,5) mm så att U1 inte hamnar under sändaren (#4).
+
 ### 2026-10-15
 - Repo skapat: struktur, README, TODO, licenser (MIT + CERN-OHL-P-2.0), .gitignore.
 - `fpga/`: `pdm_clock_gen` (startläge 1,5625 MHz → ultraljudsläge 3,125 MHz) och
