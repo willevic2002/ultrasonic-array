@@ -6,7 +6,7 @@ Länkar och vad som ska verifieras i varje dokument. Lägg inte in PDF:erna i gi
 | Komponent | Dokument | Verifiera |
 |---|---|---|
 | Knowles SPH0641LU4H-1 | [Datablad rev B](https://media.digikey.com/pdf/Data%20Sheets/Knowles%20Acoustics%20PDFs/SPH0641LU4H-1.PDF) | Kontrollerat, se nedan. Kvar: land pattern, porthål mot footprint |
-| Murata MA40S4S | Datablad (Murata) | Resonansfrekvens, max drivspänning. Not for new designs: hitta ersättare |
+| Same Sky CUSA-T75-18-2400-TH | [Datablad](https://sameskydevices.com/product/resource/cusa-t75-18-2400-th.pdf) | Ø12,5 x 9,5 mm, 40 kHz, 110 dB, 80 Vp-p. Kvar: SPL vid 10-12 V drivning, pinndelning för footprint |
 | Microchip TC4427A | Datablad (Microchip) | Matningsspänning, utgångsström, logiknivå på ingången (3,3 V från FPGA?) |
 | Real Digital Boolean Board | [Manual](https://www.realdigital.org/doc/02013cd17602c8af749f00561f88ae21), avsnitt "Expansion Connectors" | Radantal och pinout (2x15?), vilka pinnar som går till FPGA:n, Vdd/GND-placering |
 | Real Digital Boolean Board | Master-XDC på produktsidan | Pinnamn för klocka och expansionskontakter |
